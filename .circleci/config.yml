@@ -140,7 +140,7 @@ jobs:
       - store_artifacts:
           path: target/jmeter/reports
           
-Smoke-Testing:
+  Smoke-Testing:
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:8-jdk
@@ -203,7 +203,7 @@ workflows:
           requires:
             - deployDev
             - deployProd
-      - Hold [Smoke-Tetsing]:
+      - Hold [Smoke-Testing]:
           type: approval
           requires:
             - deployDev
@@ -211,6 +211,6 @@ workflows:
       - Connect-Performance-Testing:
           requires:
             - Hold [Performance-Testing]
-     - Smoke-Tetsing:
+     - Smoke-Testing:
           requires:
-            - Hold [Smoke-Tetsing]
+            - Hold [Smoke-Testing]
