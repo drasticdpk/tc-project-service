@@ -211,6 +211,6 @@ workflows:
       - Connect-Performance-Testing:
           requires:
             - Hold [Performance-Testing]
-     - Smoke-Testing:
+      - Smoke-Testing:
           requires:
             - Hold [Smoke-Testing]
