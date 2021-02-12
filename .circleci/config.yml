@@ -180,14 +180,14 @@ workflows:
             branches:
               only: ['master']   
 
-    Connect-Performance-Testing:
-        when: << pipeline.parameters.run_performancetesting >>
-        jobs:
-          - Hold [Performance-Testing]:
-              type: approval
-          - Connect-Performance-Testing:
-              requires:
-                - Hold [Performance-Testing]
-              filters:
-                branches:
-                  only: ['develop', 'connect-performance-testing']
+  Connect-Performance-Testing:
+    when: << pipeline.parameters.run_performancetesting >>
+    jobs:
+      - Hold [Performance-Testing]:
+          type: approval
+      - Connect-Performance-Testing:
+          requires:
+            - Hold [Performance-Testing]
+          filters:
+            branches:
+              only: ['develop', 'connect-performance-testing']
