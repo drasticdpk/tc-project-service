@@ -160,6 +160,8 @@ jobs:
 workflows:
   version: 2
   Connect Project Services:
+  build:
+    when: << pipeline.parameters.run_basedeployment >>
     jobs:
       - UnitTests:
           context : org-global
@@ -176,9 +178,12 @@ workflows:
             - UnitTests
           filters:
             branches:
-              only: ['master']       
+              only: ['master']   
+
+Performanceflow:
+    when: << pipeline.parameters.run_performancetesting >>
+    jobs:       
       - Hold [Performance-Testing]:
-          when: << pipeline.parameters.run_performancetesting >>
           type: approval
           requires:
             - deployDev
