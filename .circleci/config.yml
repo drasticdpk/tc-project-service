@@ -161,7 +161,6 @@ jobs:
 workflows:
   version: 2
   Connect Project Services:
-  build:
     when: << pipeline.parameters.run_basedeployment >>
     jobs:
       - UnitTests:
