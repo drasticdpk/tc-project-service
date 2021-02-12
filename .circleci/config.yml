@@ -175,7 +175,7 @@ workflows:
             branches:
               only: ['master']   
 
-  Connect-Performance-Testing:
+  Performance Testing:
     when: << pipeline.parameters.run_performancetesting >>
     jobs:
       - Hold [Performance-Testing]:
