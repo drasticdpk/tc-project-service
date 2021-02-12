@@ -1,10 +1,11 @@
-version: 2
-run_basedeployment:
-    default: false
-    type: boolean
-run_performancetesting:
-    default: true
-    type: boolean
+version: 2.1
+parameters:
+    run_basedeployment:
+        default: false
+        type: boolean
+    run_performancetesting:
+        default: true
+        type: boolean
 python_env: &python_env
   docker:
     - image: circleci/python:2.7-stretch-browsers
