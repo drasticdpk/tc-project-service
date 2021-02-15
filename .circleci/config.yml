@@ -6,6 +6,11 @@ parameters:
     run_performancetesting:
         default: false
         type: boolean
+    run_smoketesting:
+        default: false
+        type: boolean    
+
+
 python_env: &python_env
   docker:
     - image: circleci/python:2.7-stretch-browsers
@@ -53,7 +58,7 @@ deploy_steps: &deploy_steps
         --url https://circleci.com/api/v2/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/pipeline \
         --header "Circle-Token: ${QA_USER_TOKEN}" \
         --header 'content-type: application/json' \
-        --data '{"branch":"'"$CIRCLE_BRANCH"'","parameters":{"run_performancetesting":true , "run_basedeployment": false}}'
+        --data '{"branch":"'"$CIRCLE_BRANCH"'","parameters":{"run_smoketesting":true , "run_basedeployment": false}}'
         fi 
 
 
@@ -120,39 +125,35 @@ jobs:
       APPNAME: "projects-api"
     steps: *deploy_steps
 
-  Connect-Performance-Testing:
-    docker:
-      # specify the version you desire here
-      - image: circleci/openjdk:8-jdk
-
-    working_directory: ~/repo
-
-    environment:
-      # Customize the JVM maximum heap limit
-      MAVEN_OPTS: -Xmx3200m
-
-    steps:
-      - checkout
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-
-      - run: mvn dependency:go-offline
-
-      - save_cache:
+  Connect-Automation-Testing: 
+    working_directory: ~/connect-smoke-testing/connect-app-e2e-test 
+    docker: 
+      - image: circleci/node:11-browsers 
+    steps: 
+      - checkout 
+      - run:
+          name: update-npm
+          command: 'sudo npm install -g npm@latest'
+      - restore_cache: 
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: install-npm-wee
+          command: npm install
+      - save_cache: 
+          key: dependency-cache-{{ checksum "package.json" }}
           paths:
-            - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
-
-      - run: mvn verify
-
-      - store_artifacts:
-          path: target/jmeter/reports
-
+            - ./node_modules
+      - run: 
+          name: browser Update
+          command: './node_modules/.bin/webdriver-manager update'      
+      - run: 
+          name: browser start
+          command: './node_modules/.bin/webdriver-manager start'   
+          background: true    
+      - run: # run tests
+          name: Execute Smoke Test
+          command: npm test
+  
 workflows:
   version: 2
   Connect Project Services:
@@ -175,14 +176,10 @@ workflows:
             branches:
               only: ['master']   
 
-  Performance Testing:
-    when: << pipeline.parameters.run_performancetesting >>
+  Smoke  Testing:
+    when: << pipeline.parameters.run_smoketesting >>
     jobs:
-      - Hold [Performance-Testing]:
-          type: approval
-      - Connect-Performance-Testing:
-          requires:
-            - Hold [Performance-Testing]
+      - Connect-Automation-Testing:
           filters:
             branches:
-              only: ['develop', 'connect-performance-testing']
+              only: ['connect-smoke-testing']
